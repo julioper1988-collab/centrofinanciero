@@ -9,7 +9,8 @@ Datos en Supabase: proyecto `sdpysvowvwucjfnyosuf`, tabla `cf_app_state` (id `ma
 ### Javier Flores
 - Deuda base: Gs. 1.205.000 hasta el 15/09/2026 (en `debts`).
 - Desde el 16/09: saldo = deuda − (días trabajados × 100.000) + gastos anotados a Javier.
-- 28/09/2026 feriado (no trabajó). Faltó 2 días más (fechas no especificadas).
+- 28/09/2026 feriado (no trabajó). Faltó 2 días aparte de feriados y domingos (fechas no especificadas).
+- Saldo final al 03/10/2026: **Gs. 525.000** (te debe).
 - **Último día: sábado 03/10/2026 (medio día, Gs. 50.000).**
 
 ### Germán González
