@@ -11,7 +11,8 @@ const SB_URL='https://sdpysvowvwucjfnyosuf.supabase.co';
 const SB_KEY='sb_publishable_Px9Uz083rGIy3drTUvlDdw_otNlwCvs';
 const sb=window.supabase.createClient(SB_URL,SB_KEY);
 async function cfPull(id){const{data,error}=await sb.from('cf_app_state').select('data').eq('id',id).maybeSingle();if(error){console.error('cfPull',id,error);return null}return data?data.data:null}
-async function cfPush(id,payload){const{error}=await sb.from('cf_app_state').upsert({id,data:payload,updated_at:new Date().toISOString()});if(error)console.error('cfPush',id,error)}
+async function cfPush(id,payload){const ts=new Date().toISOString();const{error}=await sb.from('cf_app_state').upsert({id,data:payload,updated_at:ts});if(error){console.error('cfPush',id,error);return}try{localStorage.setItem('cf_rts_'+id,String(Date.parse(ts)))}catch(e){}}
+async function cfPullMeta(id){const{data,error}=await sb.from('cf_app_state').select('data,updated_at').eq('id',id).maybeSingle();if(error){console.error('cfPullMeta',id,error);return false}return data||null}
 function cfDebounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 function cfUserTyping(){const a=document.activeElement;return a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.isContentEditable)}
 function cfStartPolling(fn,ms){setInterval(()=>{if(document.hidden||cfUserTyping())return;fn()},ms);document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!cfUserTyping())fn()})}
@@ -900,7 +901,7 @@ x.accounts=x.accounts.filter(a=>a.id!=='wepa'||accountUsed('wepa'));
 return x}return structuredClone(base)}catch(e){return structuredClone(base)}}
 const cfPushMain=cfDebounce(()=>cfPush('main',state),1200);
 function save(){localStorage.setItem(KEY,JSON.stringify(state));cfPushMain();render()}
-async function cfSyncMainOnLoad(){try{const remote=await cfPull('main');if(remote&&(!state.tx||remote.tx&&remote.tx.length>=state.tx.length)){state=remote;localStorage.setItem(KEY,JSON.stringify(state));render()}else if(!remote&&state){cfPush('main',state)}}catch(e){console.error(e)}}
+async function cfSyncMainOnLoad(){try{const r=await cfPullMeta('main');if(r===false)return;if(r===null){if(state)cfPush('main',state);return}const rt=Date.parse(r.updated_at),seen=Number(localStorage.getItem('cf_rts_main')||0);if(!state||!state.tx||rt!==seen){state=r.data;localStorage.setItem(KEY,JSON.stringify(state));localStorage.setItem('cf_rts_main',String(rt));render()}}catch(e){console.error(e)}}
 function money(n){return 'Gs. '+Math.round(Number(n||0)).toLocaleString('es-PY')}
 function num(v){return Number(String(v||'').replace(/\./g,'').replace(/,/g,'').replace(/\s/g,''))||0}
 function localDateValue(v,endOfDay=false){
