@@ -15,3 +15,4 @@ Datos en Supabase: proyecto `sdpysvowvwucjfnyosuf`, tabla `cf_app_state` (id `ma
 
 ### Germán González
 - **Empezó a trabajar el lunes 05/10/2026.**
+- Deuda base: Gs. 1.363.000 hasta el 15/09/2026 (en `debts`). Misma regla que Javier: + gastos desde 16/09 − días trabajados desde 05/10.
