@@ -508,6 +508,48 @@ select option{background:#161b20!important;color:#f1f4f7!important}
 <style id="created-at-audit-v147">
 .load-stamp{color:#9fb0c3!important;font-size:10px!important;font-weight:700!important;display:inline-block;margin-top:5px}
 </style>
+<style id="clean-ui-v152">
+/* V1.52 - Vista limpia: menos texto, inicio ordenado por prioridad */
+.info-strip,.section-label,.view-guide,.hint,section.card:has(.notice):has(h2):not(:has(button)),
+#view-home .card .head .sub,#view-home section.card:has(#businesses){display:none!important}
+#view-home .card{margin-top:12px!important;padding:14px 16px}
+#view-home .card .head{margin-bottom:10px}
+#view-home .card h2{font-size:16px}
+.hero{padding:16px 18px!important}
+.hero-balance{font-size:32px!important;margin:4px 0 10px}
+.hero-grid{grid-template-columns:repeat(3,1fr)!important;gap:8px}
+.hero-grid .metric{padding:8px 10px;grid-column:auto!important}
+#accounts .kind{display:none}
+#view-home .clear-search{background:transparent!important;color:inherit!important}
+.bancard-metric span{line-height:1.2}
+.hero-grid .metric span{font-size:10px}
+.hero-grid .metric strong{font-size:14px}
+.actions{grid-template-columns:repeat(4,1fr)!important;gap:8px;margin:12px 0}
+.actions .action{padding:10px 4px;font-size:11px;line-height:1.2}
+.closings{grid-template-columns:1fr 1fr!important;display:grid;gap:8px}
+.closebtn span{display:none}
+.closebtn{padding:12px!important;text-align:center}
+.bancard-summary{grid-template-columns:repeat(3,1fr)!important;gap:8px}
+.bancard-metric{padding:8px 10px!important}
+.bancard-metric span{font-size:10px}
+.bancard-metric strong{font-size:14px}
+.account{padding:10px 12px!important}
+.account .ico{width:34px;height:34px;font-size:16px}
+#areaBalances .kind{display:none}
+.page-title p{font-size:13px;opacity:.75}
+/* Orden en Inicio: Cuentas → Carga rápida → Cierres → Movimientos → Bancard → Áreas */
+#view-home .grid{display:flex!important;flex-direction:column;gap:0}
+#view-home .grid>div{display:contents}
+#view-home section:has(#accounts){order:1}
+#view-home section.quick{order:2}
+#view-home section:has(.closings){order:3}
+#view-home section:has(#txList){order:4}
+#view-home section:has(#bancardList){order:5}
+#view-home section:has(#areaBalances){order:6}
+@media(min-width:900px){
+ #view-home .grid{display:grid!important;grid-template-columns:1fr 1fr;gap:0 16px;grid-auto-flow:dense}
+}
+</style>
 </head>
 <body>
 <div class="app">
