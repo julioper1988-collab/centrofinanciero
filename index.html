@@ -562,6 +562,23 @@ select option{background:#161b20!important;color:#f1f4f7!important}
 .mv-totals div{border:1px solid #4b5560;border-radius:12px;padding:8px 10px}
 .mv-totals span{display:block;font-size:10px;text-transform:uppercase;opacity:.75}
 .mv-totals strong{font-size:13px;white-space:nowrap}
+#view-home section.quick{display:none!important}
+#view-home section.today-exp{order:2}
+.te-biz{display:grid;gap:6px;margin-bottom:10px}
+.te-row{display:flex;justify-content:space-between;padding:8px 12px;border:1px solid #4b5560;border-radius:12px;font-size:13px}
+.te-total{font-size:15px;font-weight:800}
+#todayExpList .compact-detail .meta *{color:inherit!important}
+#todayExpList .compact-detail .meta{color:#e0e5ea!important;font-size:11px!important;line-height:1.55!important;padding-top:0!important}
+#todayExpList .compact-detail .tx-action.delete{color:#ff9ca4!important}
+#todayExpList .compact-detail .tx-action{background:#252d34!important;color:#edf1f5!important;border-color:#52606c!important}
+#todayExpList .compact-detail{background:#181e24!important;border-top:1px solid #46515c!important;padding:12px 14px 14px!important}
+#todayExpList .compact-tx .ct-amount{font-size:13px!important;font-weight:900!important}
+#todayExpList .compact-tx .ct-arrow{color:#d9dfe5!important}
+#todayExpList .compact-tx .ct-ico{background:#2b333b!important;border:1px solid #4b5661!important;color:#edf2f6!important}
+#todayExpList .compact-tx .ct-sub{color:#d8dee5!important;font-size:11px!important;margin-top:5px!important;line-height:1.4!important}
+#todayExpList .compact-tx .ct-title{color:#f5f7f9!important;font-size:13px!important;font-weight:850!important}
+#todayExpList .compact-tx summary{background:#20262c!important;color:#f4f6f8!important;padding:13px 14px!important}
+#todayExpList .compact-tx{background:#20262c!important;border:1px solid #4d5863!important;box-shadow:0 4px 12px rgba(0,0,0,.16)!important}
 </style>
 </head>
 <body>
@@ -607,6 +624,12 @@ select option{background:#161b20!important;color:#f1f4f7!important}
         <div class="head"><div><h2>⚡ Carga rápida</h2><div class="sub">Escribí como hablás normalmente y revisá antes de guardar.</div></div></div>
         <div class="quickbox"><input id="quickInput" placeholder="Ej: 350 mil carne asaditos efectivo" /><button id="quickBtn">→</button></div>
         <div class="hint">Este bloque es para registrar un movimiento rápido. No guarda solo: primero abre el formulario para confirmar.</div>
+      </section>
+
+      <section class="card tone-red today-exp">
+        <div class="head"><div><h2>🧾 Gastos de hoy</h2></div><button type="button" class="linkbtn" id="todayExpMore">Ver todo</button></div>
+        <div id="todayExpBiz" class="te-biz"></div>
+        <div class="compact-list" id="todayExpList"></div>
       </section>
 
       <section class="card tone-green" style="margin-top:16px">
@@ -1013,6 +1036,7 @@ function mvFillSelects(){
  [['#mvBiz','biz'],['#mvAcc','acc'],['#mvCat','cat'],['#mvCp','cp']].forEach(([id,k])=>q(id).addEventListener('change',e=>{mvF[k]=e.target.value;render()}));
  q('#mvClear').addEventListener('click',()=>{Object.assign(mvF,{p:'all',t:'',q:'',biz:'',acc:'',cat:'',cp:''});q('#mvSearch').value='';['#mvPeriod','#mvType'].forEach(id=>q(id).querySelectorAll('button').forEach((x,i)=>x.classList.toggle('on',i===0)));render()});
 })();
+(function(){const b=document.querySelector('#todayExpMore');if(!b)return;b.addEventListener('click',()=>{Object.assign(mvF,{p:'today',t:'gasto',q:'',biz:'',acc:'',cat:'',cp:''});const q=s=>document.querySelector(s);q('#mvSearch').value='';q('#mvPeriod').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.p==='today'));q('#mvType').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.t==='gasto'));document.querySelector('#mainNav [data-view="movements"]')?.click();render()})})();
 function money(n){return 'Gs. '+Math.round(Number(n||0)).toLocaleString('es-PY')}
 function num(v){return Number(String(v||'').replace(/\./g,'').replace(/,/g,'').replace(/\s/g,''))||0}
 function localDateValue(v,endOfDay=false){
@@ -1161,6 +1185,7 @@ function render(){refreshDateDayHints();
  const areaEl=document.querySelector('#areaBalances');if(areaEl)areaEl.innerHTML=state.businesses.map(b=>{const v=areaOwnedBalance(b.id);return `<div class="account"><div class="ico">${b.emoji}</div><div class="grow"><div class="name">${b.name}</div><div class="kind">${b.id==='personal'?'Dinero ya asignado a Personal':'Pendiente de retirar / usar en el negocio'}</div></div><div class="amt ${v<0?'red':''}">${money(v)}</div></div>`}).join('');
  document.querySelector('#accounts').innerHTML=state.accounts.map(a=>`<div class="account"><div class="ico">${a.emoji}</div><div class="grow"><div class="name">${a.name}</div><div class="kind">${a.type==='pending'?'Pendiente de acreditar':'Cuenta de dinero'}</div></div><div class="amt ${accountBalance(a.id)>=0?'':'red'}">${money(accountBalance(a.id))}</div></div>`).join('');
  const sorted=[...state.tx].sort((a,b)=>localDateValue(b.date)-localDateValue(a.date));const hq=latestTxQuery();const homeFiltered=sorted.filter(t=>txMatchesSearch(t,hq));const homeLimit=hq?20:(homeTxExpanded?12:5);const list=homeFiltered.slice(0,homeLimit);const txHome=document.querySelector('#txList');if(txHome)txHome.innerHTML=list.length?list.map(t=>txCompactHtml(t)).join(''):'<div class="empty">No encontré movimientos que coincidan con tu búsqueda.</div>';const hc=document.querySelector('#latestTxCount');if(hc)hc.textContent=hq?`${homeFiltered.length} coincidencia${homeFiltered.length===1?'':'s'}`:`Mostrando ${Math.min(homeLimit,homeFiltered.length)} de ${homeFiltered.length}`;const ht=document.querySelector('#latestTxToggle');if(ht){ht.style.display=hq||homeFiltered.length<=5?'none':'';ht.textContent=homeTxExpanded?'Ver menos':'Ver más'};
+ {const tk=dayKey(new Date());const te=state.tx.filter(t=>t.type==='gasto'&&dayKey(t.date||new Date())===tk).sort((a,b)=>localDateValue(b.date)-localDateValue(a.date));const tb=document.querySelector('#todayExpBiz'),tl=document.querySelector('#todayExpList');if(tb&&tl){const tot=te.reduce((a,t)=>a+Number(t.amount||0),0);const by={};te.forEach(t=>{const k=t.businessId||'personal';by[k]=(by[k]||0)+Number(t.amount||0)});tb.innerHTML=te.length?`<div class="te-row te-total"><span>Total</span><b class="red">${money(tot)}</b></div>`+Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{const b=state.businesses.find(x=>x.id===k);return `<div class="te-row"><span>${b?(b.emoji||'')+' '+b.name:'Personal'}</span><b>${money(v)}</b></div>`}).join(''):'';tl.innerHTML=te.length?te.slice(0,6).map(t=>txCompactHtml(t)).join(''):'<div class="empty">Sin gastos hoy.</div>'}}
  mvFillSelects();const mvList=sorted.filter(mvMatch);mvTotals(mvList);const allTx=document.querySelector('#allTxList');if(allTx)allTx.innerHTML=mvList.length?mvList.map(t=>txHtml(t)).join(''):'<div class="empty">'+(sorted.length?'Ningún movimiento con estos filtros.':'Todavía no hay movimientos.')+'</div>';const mc=document.querySelector('#movementCount');if(mc)mc.textContent=mvList.length+' movimiento'+(mvList.length===1?'':'s');
  renderReports();
  document.querySelector('#configBusinesses').innerHTML=state.businesses.map(b=>`<div class="config-row"><div style="font-size:24px">${b.emoji}</div><div class="grow"><b>${b.name}</b><small>Negocio / área</small></div><div class="tx-actions"><button type="button" class="tx-action" data-edit-business="${b.id}">Editar</button><button type="button" class="tx-action delete" data-delete-business="${b.id}">Eliminar</button></div></div>`).join('');
