@@ -579,6 +579,12 @@ select option{background:#161b20!important;color:#f1f4f7!important}
 #todayExpList .compact-tx .ct-title{color:#f5f7f9!important;font-size:13px!important;font-weight:850!important}
 #todayExpList .compact-tx summary{background:#20262c!important;color:#f4f6f8!important;padding:13px 14px!important}
 #todayExpList .compact-tx{background:#20262c!important;border:1px solid #4d5863!important;box-shadow:0 4px 12px rgba(0,0,0,.16)!important}
+@media(min-width:900px){
+ #view-home .grid{display:grid!important;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+ #view-home .grid>div{display:flex!important;flex-direction:column}
+ #view-home .grid>div:first-child section:has(#txList){order:9}
+}
+#closingHistory [data-closing-toggle]{justify-self:center}
 </style>
 </head>
 <body>
@@ -643,12 +649,7 @@ select option{background:#161b20!important;color:#f1f4f7!important}
       </section>
 
       <div class="section-label control">Control y pendientes</div>
-      <section class="card tone-amber">
-        <div class="head"><div><h2>💳 Control Bancard</h2><div class="sub">Compara el cierre POS con lo acreditado en Ueno. El POS no afecta el saldo.</div></div></div>
-        <div class="bancard-summary"><div class="bancard-metric"><span>POS registrado</span><strong id="bancardPosTotal">Gs. 0</strong></div><div class="bancard-metric"><span>Acreditado / cobrado</span><strong class="green" id="bancardPaidTotal">Gs. 0</strong></div><div class="bancard-metric"><span>Pendiente</span><strong class="red" id="bancardPendingTotal">Gs. 0</strong></div></div>
-        <div id="bancardList"></div>
-        <button type="button" class="mini-btn" id="bancardHistoryToggle" aria-controls="bancardList" aria-expanded="false" hidden>Ver todos los días</button>
-      </section>
+      
 
       <section class="card tone-slate" style="margin-top:16px">
         <div class="head"><div><h2>🕘 Últimos movimientos</h2><div class="sub">Vista compacta. Tocá un movimiento solo cuando quieras ver sus detalles.</div></div></div>
@@ -668,6 +669,13 @@ select option{background:#161b20!important;color:#f1f4f7!important}
       <section class="card tone-green" style="margin-top:16px">
         <div class="head"><div><h2>🏷️ Saldo por área</h2><div class="sub">De quién es el dinero, aunque físicamente esté mezclado en Efectivo o Ueno.</div></div></div>
         <div class="accounts" id="areaBalances"></div>
+      </section>
+
+      <section class="card tone-amber" style="margin-top:16px">
+        <div class="head"><div><h2>💳 Control Bancard</h2><div class="sub">Compara el cierre POS con lo acreditado en Ueno. El POS no afecta el saldo.</div></div></div>
+        <div class="bancard-summary"><div class="bancard-metric"><span>POS registrado</span><strong id="bancardPosTotal">Gs. 0</strong></div><div class="bancard-metric"><span>Acreditado / cobrado</span><strong class="green" id="bancardPaidTotal">Gs. 0</strong></div><div class="bancard-metric"><span>Pendiente</span><strong class="red" id="bancardPendingTotal">Gs. 0</strong></div></div>
+        <div id="bancardList"></div>
+        <button type="button" class="mini-btn" id="bancardHistoryToggle" aria-controls="bancardList" aria-expanded="false" hidden>Ver todos los días</button>
       </section>
 
       <section class="card tone-purple" style="margin-top:16px">
@@ -1037,6 +1045,7 @@ function mvFillSelects(){
  q('#mvClear').addEventListener('click',()=>{Object.assign(mvF,{p:'all',t:'',q:'',biz:'',acc:'',cat:'',cp:''});q('#mvSearch').value='';['#mvPeriod','#mvType'].forEach(id=>q(id).querySelectorAll('button').forEach((x,i)=>x.classList.toggle('on',i===0)));render()});
 })();
 (function(){const b=document.querySelector('#todayExpMore');if(!b)return;b.addEventListener('click',()=>{Object.assign(mvF,{p:'today',t:'gasto',q:'',biz:'',acc:'',cat:'',cp:''});const q=s=>document.querySelector(s);q('#mvSearch').value='';q('#mvPeriod').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.p==='today'));q('#mvType').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.t==='gasto'));document.querySelector('#mainNav [data-view="movements"]')?.click();render()})})();
+document.addEventListener('click',e=>{if(e.target.closest('[data-closing-toggle]')){window.cfClosingOpen=!window.cfClosingOpen;renderClosingHistory()}});
 function money(n){return 'Gs. '+Math.round(Number(n||0)).toLocaleString('es-PY')}
 function num(v){return Number(String(v||'').replace(/\./g,'').replace(/,/g,'').replace(/\s/g,''))||0}
 function localDateValue(v,endOfDay=false){
@@ -1265,7 +1274,7 @@ function bancardSplit(cid,bizId,card,bancard){if(bizId!=='bodega')return{applied
 function bancardExcessPreview(cid,date,bizId,card,bancard){const {excess}=bancardSplit(cid,bizId,card,bancard);if(excess<=0)return '';let left=excess;const lines=[];for(const x of bancardOlderPending(cid,date)){if(left<=0)break;const t=Math.min(left,x.p);lines.push('• '+formatDateWithDay(x.b.date)+': '+money(t));left-=t}return 'La tarjeta acreditada supera el POS del día en '+money(excess)+'.\n'+(lines.length?'Se descuenta de pendientes Bancard anteriores:\n'+lines.join('\n'):'No hay pendientes Bancard anteriores.')+(left>0?'\nSobran '+money(left)+' sin pendiente: quedan solo como ingreso en Ueno.':'')+'\n\n¿Confirmar?'}
 function bancardApplyExcess(cid,date,bizId,card,bancard){(state.bancardClosures||[]).forEach(b=>{if(b.collections)b.collections=b.collections.filter(c=>String(c.fromClosingId||'')!==String(cid))});const {applied,excess}=bancardSplit(cid,bizId,card,bancard);let left=excess;for(const x of bancardOlderPending(cid,date)){if(left<=0)break;const t=Math.min(left,x.p);(x.b.collections=x.b.collections||[]).push({id:id(),amount:t,date,note:'Excedente acreditado en cierre del '+formatDateWithDay(date),fromClosingId:cid,createdAt:realLoadStamp()});x.b.updatedAt=realLoadStamp();left-=t}return applied}
 function closingIdsList(){const ids=new Set();state.tx.forEach(t=>{if(t.closingId)ids.add(String(t.closingId))});(state.receivables||[]).forEach(r=>{if(r.closingId)ids.add(String(r.closingId))});(state.bancardClosures||[]).forEach(b=>ids.add(String(b.id)));return [...ids].map(id=>({id,...closingParts(id)})).filter(p=>p.businessId&&p.date).sort((a,b)=>String(b.date).localeCompare(String(a.date)))}
-function renderClosingHistory(){const el=document.querySelector('#closingHistory');if(!el)return;const byDate=new Map();closingIdsList().forEach(p=>{if(!byDate.has(p.date))byDate.set(p.date,[]);byDate.get(p.date).push(p)});const dates=[...byDate.keys()].slice(0,10);el.innerHTML=dates.length?dates.map(d=>{const ps=byDate.get(d);return `<details class="compact-tx"><summary><div class="ct-grow"><div class="ct-title">${formatDateWithDay(d)}</div><div class="ct-sub">${ps.map(p=>state.businesses.find(b=>b.id===p.businessId)?.emoji||'').join(' ')}</div></div><div class="ct-amount green">${money(ps.reduce((s,p)=>s+p.cash+p.card+p.tr,0))}</div><div class="ct-arrow">⌄</div></summary><div class="compact-detail">${ps.map(p=>{const b=state.businesses.find(x=>x.id===p.businessId);return `<div class="meta" style="padding-top:10px"><b>${b?.emoji||''} ${escapeHtml(b?.name||'')}</b> · Efectivo ${money(p.cash)} · Tarjeta ${money(p.card)} · Transf. ${money(p.tr)} · Fiado ${money(p.credit)}${p.pos?' · POS '+money(p.pos):''}</div><div class="tx-actions"><button type="button" class="tx-action" data-edit-closing="${p.id}">Editar</button><button type="button" class="tx-action delete" data-delete-closing="${p.id}">Eliminar</button></div>`}).join('')}</div></details>`}).join(''):'<div class="empty">Sin cierres guardados.</div>'}
+function renderClosingHistory(){const el=document.querySelector('#closingHistory');if(!el)return;const byDate=new Map();closingIdsList().forEach(p=>{if(!byDate.has(p.date))byDate.set(p.date,[]);byDate.get(p.date).push(p)});const dates=[...byDate.keys()].slice(0,window.cfClosingOpen?10:3);el.innerHTML=dates.length?dates.map(d=>{const ps=byDate.get(d);return `<details class="compact-tx"><summary><div class="ct-grow"><div class="ct-title">${formatDateWithDay(d)}</div><div class="ct-sub">${ps.map(p=>state.businesses.find(b=>b.id===p.businessId)?.emoji||'').join(' ')}</div></div><div class="ct-amount green">${money(ps.reduce((s,p)=>s+p.cash+p.card+p.tr,0))}</div><div class="ct-arrow">⌄</div></summary><div class="compact-detail">${ps.map(p=>{const b=state.businesses.find(x=>x.id===p.businessId);return `<div class="meta" style="padding-top:10px"><b>${b?.emoji||''} ${escapeHtml(b?.name||'')}</b> · Efectivo ${money(p.cash)} · Tarjeta ${money(p.card)} · Transf. ${money(p.tr)} · Fiado ${money(p.credit)}${p.pos?' · POS '+money(p.pos):''}</div><div class="tx-actions"><button type="button" class="tx-action" data-edit-closing="${p.id}">Editar</button><button type="button" class="tx-action delete" data-delete-closing="${p.id}">Eliminar</button></div>`}).join('')}</div></details>`}).join('')+(byDate.size>3?`<button type="button" class="linkbtn" data-closing-toggle>${window.cfClosingOpen?'Ver menos':'Ver más'}</button>`:''):'<div class="empty">Sin cierres guardados.</div>'}
 document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit-closing]');if(ed)return openClosingEdit(ed.dataset.editClosing);const dl=e.target.closest('[data-delete-closing]');if(!dl)return;const cid=dl.dataset.deleteClosing,p=closingParts(cid);if((p.b?.collections||[]).length)return alert('Este cierre tiene cobros Bancard posteriores. Eliminá primero esos cobros.');if(!confirm('¿Eliminar el cierre completo?'))return;state.tx=state.tx.filter(t=>String(t.closingId||'')!==cid||t.cashControlClosureId);const r=new Set(p.r.map(x=>String(x.id)));state.receivables=state.receivables.filter(x=>!r.has(String(x.id)));state.bancardClosures=state.bancardClosures.filter(x=>String(x.id)!==cid);state.bancardClosures.forEach(b=>{if(b.collections)b.collections=b.collections.filter(c=>String(c.fromClosingId||'')!==cid)});save()});
 document.querySelector('#closingDate').addEventListener('change',e=>{if(document.querySelector('#closingEditId').value)return;const biz=state.businesses.find(b=>b.name===document.querySelector('#closingBusiness').value);const ex=biz&&closingIdsList().find(p=>p.businessId===biz.id&&p.date===e.target.value);if(ex&&confirm('Ya hay un cierre de '+biz.name+' ese día. ¿Abrirlo para editar?'))openClosingEdit(ex.id)});
 
