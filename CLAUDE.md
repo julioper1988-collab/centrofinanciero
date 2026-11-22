@@ -16,8 +16,9 @@ Datos en Supabase: proyecto `sdpysvowvwucjfnyosuf`, tabla `cf_app_state` (id `ma
 ### Germán González
 - **Empezó a trabajar el lunes 05/10/2026.**
 - Deuda base: Gs. 1.363.000 hasta el 15/09/2026 (en `debts`). Misma regla que Javier: + gastos desde 16/09 − días trabajados desde 05/10.
+- Saldo al 22/11/2026: **Gs. 1.152.000** (42 días × 100.000; gastos 3.989.000).
 
 ## Días trabajados (fuente)
 - Días abiertos de Asaditos: tabla `asaditos_v2_app_state`, `data->'days'`; trabajado = `cash.ef > 0` (misma regla que `conc_diario` en Conciliación).
 - Es por negocio, no por persona: faltas individuales no quedan registradas.
-- Sueldo por día en Conciliación: `conc_config.params` (german 110.000, mirna 110.000, hugo 100.000).
+- De Conciliación solo se toman los DÍAS trabajados. El sueldo para la deuda es SIEMPRE Gs. 100.000/día (ignorar `conc_config.params`).
